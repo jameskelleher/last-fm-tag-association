@@ -97,7 +97,7 @@ tag_frame = DataFrame(tag_series).fillna(0)
 # default DataFrame is the tag_frame generated above, though the user can specify another one.
 # additinoally, i've incldued a 'binary mode' that maps each element of the vectors to a 1 or
 # a 0. this can be used if the user is interested in analyzing completely unweighted
-# associations between two tags. given the number of 'junk tags' with log tag count, i've also
+# associations between two tags. given the number of 'junk tags' with low tag count, i've also
 # included an option for a user to set a threshold for how many counts a tag needs to have
 # before it can be included in the binary option. the verbose mode is used to print the
 # results to the console.
