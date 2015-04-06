@@ -34,12 +34,14 @@ for artist in artists:
     # we add the artist to the parameters
     params['artist'] = artist['name']
     
-    tags = get(url, params=params).json()['toptags']
+    tags = get(url, params=params).json()
     
-    # check for the possibility of no tags
-    if 'tag' in tags:
-        tags = tags['tag']
+    # the api tends to be error-prone, and will frequently not retrieve any tags for popular 
+    # artists. in that case, we simply ignore the error and carry on after warning the user
+    if 'toptags' in tags and 'tag' in tags['toptags']:
+        tags = tags['toptags']['tag']
     else:
+        print 'Warning: no tags found for artist: ' + artist['name']
         continue
         
     # if there is only one tag, 'tags' is a dict, instead of a list
@@ -53,8 +55,12 @@ for artist in artists:
         # it is my understanding that when a tag has 'count' = 0, only one user submitted the
         # tag (otherwise, there simply wouldn't be a tag). therefore, 'count' = 0 really means a 
         # single tag. it follows that all counts should be incremented by 1, given that last.fm
-        # apparently begins its count at 0
-        tag_info[tag['name']] = int(tag['count']) + 1
+        # apparently begins its count at 0. additionally, sometimes 'count' will be 0, in which
+        # case I assume that 'count' is meant to be 0
+        c = tag['count']
+        if c == '':
+            c = 0
+        tag_info[tag['name']] = int(c) + 1
         
     
     # construct a series indexed on tag counts
