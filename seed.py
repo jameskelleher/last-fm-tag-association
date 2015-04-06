@@ -73,7 +73,7 @@ for artist in artists:
 # be filled as 0
 tag_frame = DataFrame(tag_series).fillna(0)
 
-def tag_association(t1, t2, binary=False, df=tag_frame):
+def tag_association(t1, t2, binary=False, df=tag_frame, verbose=False):
     v1, v2 = df[t1], df[t2]
     if binary:
         v1 = v1.apply(lambda x: 1 if x != 0 else 0)
@@ -81,14 +81,17 @@ def tag_association(t1, t2, binary=False, df=tag_frame):
     dot = np.dot(v1, v2)
     norm_prod = np.linalg.norm(v1) * np.linalg.norm(v2)
     cos_sim = dot / norm_prod
+    if verbose:
+        if binary:
+            bm = ' in binary mode'
+        else:
+            bm = ''
+        print 'Similarity between '+t1+' and '+t2+bm+': '+str(cos_sim)
     return cos_sim
     
-rh = tag_association('rap', 'hip hop')
-rr = tag_association('rap', 'rock')
-rc = tag_association('rap', 'country')
-
-print 'Similarity between rap and hip-hop: ' + str(rh)
-print 'Similarity between rap and rock: ' + str(rr)
-print 'Similarity between rap and country: ' + str(rc)
+tag_association('rap', 'hip hop', verbose=True)
+tag_association('rap', 'rock', verbose=True)
+tag_association('rap', 'rock', True, verbose=True)
+tag_association('rap', 'country', verbose=True)
 
     
