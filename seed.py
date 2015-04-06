@@ -7,7 +7,7 @@
 # compares how strongly associated the tags are to each other. Feel free to
 # include any weighting or balancing in your metric, as long as you can explain it.
 
-# Methods: we can get a value of association between two tags using the method of cosine similarity.
+# Solution: we can get a value of association between two tags using the method of cosine similarity.
 # First, we assemble the information into a DataFrame of tag counts per artist. This DataFrame is
 # indexed by artist, with each tag appearing as a column head. As all columns from the DataFrame are
 # indexed identically, we can treat two columns as two vectors in the same vector space and simply
@@ -29,7 +29,7 @@ api_key = 'ed6cd1dd2b34712cbf3018387d28332b'
 # endpoint
 url = 'http://ws.audioscrobbler.com/2.0/'
 
-# parameters needed to use the 'chart.getTopArtists' method
+# parameters needed to use the 'chart.getTopArtists' method. 'limit' sets the number of results
 params = {'method': 'chart.getTopArtists', 'api_key': api_key, 'format': 'json', 'limit': 1000}
 
 # IMPORTANT NOTE: in my personal testing, for a while the 'chart.getTopArtists' method failed
@@ -54,6 +54,7 @@ for artist in artists:
     # we add the artist to the parameters
     params['artist'] = artist['name']
     
+    # response as json
     tags = get(url, params=params).json()
     
     # the api tends to be error-prone, and will frequently not retrieve any tags for popular 
@@ -64,8 +65,8 @@ for artist in artists:
         print 'Warning: no tags found for artist: ' + artist['name']
         continue
         
-    # if there is only one tag, 'tags' is a dict, instead of a list
-    # we need to make sure 'tags' is always a list
+    # if there is only one tag, 'tags' is a dict, instead of a list. we need to make sure
+    # 'tags' is always a list for the following loop to function
     if isinstance(tags, dict):
         tags = [tags]
         
@@ -89,8 +90,8 @@ for artist in artists:
     # add the series to our list
     tag_series.append(s)
 
-# create the DataFrame. since 'count' = 0 really means 'count' = 1, missing info can therefore
-# be filled as 0
+# create the DataFrame indexed on artists with columns being tag counts. since 'count' = 0
+# really means 'count' = 1, missing info can thereforebe filled as 0
 tag_frame = DataFrame(tag_series).fillna(0)
 
 # we can use the following function to generate cosine similarities for two tag strings. the
@@ -122,5 +123,3 @@ tag_association('rap', 'hip hop', verbose=True)
 tag_association('rap', 'rock', verbose=True)
 tag_association('rap', 'rock', binary=True, verbose=True)
 tag_association('rap', 'country', verbose=True)
-
-    
