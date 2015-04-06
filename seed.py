@@ -1,3 +1,21 @@
+# Goal: Construct a data set that relates Last.fm tags to each other, revealing 
+# which genres (and other tags) are most associated.
+
+# Details: Using the Last.fm API, collect the top tags among a large set of popular
+# artists (1000 or more). This data should be structured and stored in whatever
+# format you deem most efficient. From this raw data, create a metric that
+# compares how strongly associated the tags are to each other. Feel free to
+# include any weighting or balancing in your metric, as long as you can explain it.
+
+# Methods: we can get a value of association between two tags using the method of cosine similarity.
+# First, we assemble the information into a DataFrame of tag counts per artist. This DataFrame is
+# indexed by artist, with each tag appearing as a column head. As all columns from the DataFrame are
+# indexed identically, we can treat two columns as two vectors in the same vector space and simply
+# find the cosine of the angle between them to get a value of association. For two vectors of
+# postive values, the outcome will be in [0, 1]: 0 for no association, and 1 for perfect association.
+# Note we are not concerned with the magnitude of either vector, but rather with their orientation.
+# In other terms, we are attempting to identify how highly correlated they are.
+
 import json
 
 import pandas as pd
@@ -28,6 +46,8 @@ tag_series = []
 
 # parameters needed to use the 'artist.getTopTags' method
 params = {'method': 'artist.getTopTags', 'api_key': api_key, 'format':'json'}
+
+
 
 for artist in artists:
     
@@ -73,11 +93,19 @@ for artist in artists:
 # be filled as 0
 tag_frame = DataFrame(tag_series).fillna(0)
 
-def tag_association(t1, t2, binary=False, df=tag_frame, verbose=False):
+# we can use the following function to generate cosine similarities for two tag strings. the
+# default DataFrame is the tag_frame generated above, though the user can specify another one.
+# additinoally, i've incldued a 'binary mode' that maps each element of the vectors to a 1 or
+# a 0. this can be used if the user is interested in analyzing completely unweighted
+# associations between two tags. given the number of 'junk tags' with log tag count, i've also
+# included an option for a user to set a threshold for how many counts a tag needs to have
+# before it can be included in the binary option. the verbose mode is used to print the
+# results to the console.
+def tag_association(t1, t2, binary=False, bin_thresh=1, df=tag_frame, verbose=False):
     v1, v2 = df[t1], df[t2]
     if binary:
-        v1 = v1.apply(lambda x: 1 if x != 0 else 0)
-        v2 = v2.apply(lambda x: 1 if x != 0 else 0)
+        v1 = v1.apply(lambda x: 1 if x >= bin_thresh else 0)
+        v2 = v2.apply(lambda x: 1 if x >= bin_thresh else 0)
     dot = np.dot(v1, v2)
     norm_prod = np.linalg.norm(v1) * np.linalg.norm(v2)
     cos_sim = dot / norm_prod
@@ -89,9 +117,10 @@ def tag_association(t1, t2, binary=False, df=tag_frame, verbose=False):
         print 'Similarity between '+t1+' and '+t2+bm+': '+str(cos_sim)
     return cos_sim
     
+# some test runs of the tag_association function
 tag_association('rap', 'hip hop', verbose=True)
 tag_association('rap', 'rock', verbose=True)
-tag_association('rap', 'rock', True, verbose=True)
+tag_association('rap', 'rock', binary=True, verbose=True)
 tag_association('rap', 'country', verbose=True)
 
     
