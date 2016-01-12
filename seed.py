@@ -95,21 +95,21 @@ for artist in artists:
 # really means 'count' = 1, missing info can thereforebe filled as 0
 tag_frame = DataFrame(tag_series).fillna(0)
 
-# We can use the following function to generate cosine similarities for two tag strings. The
+# We can use the following function to generate cosine similarities for two tags. The
 # default DataFrame is the tag_frame generated above, though the user can specify another one.
 # Additinoally, I've incldued a 'binary mode' that maps each element of the vectors to a 1 or
-# a 0. this can be used if the user is interested in analyzing completely unweighted
+# a 0. This can be used if the user is interested in analyzing completely unweighted
 # associations between two tags. Given the number of 'junk tags' with low tag count, I've also
-# included an option for a user to set a threshold for how many counts a tag needs to have
-# before it can be included in the binary option. The verbose mode is used to print the
-# results to the console.
-def tag_association(tag1, tag2, binary=False, bin_thresh=1, df=tag_frame, verbose=False):
-    v1, v2 = df[tag1], df[tag2]
+# included a binary mode option (bin_thresh) for a user to set a threshold for how many counts
+# a tag needs to have before it can be included in the analysis. The verbose mode is used to
+# print the results to the console.
+def tag_association(tag1, tag2, binary=False, bin_thresh=0.5, df=tag_frame, verbose=False):
+    vector1, vector2 = df[tag1], df[tag2]
     if binary:
-        v1 = v1.apply(lambda x: 1 if x >= bin_thresh else 0)
-        v2 = v2.apply(lambda x: 1 if x >= bin_thresh else 0)
-    dot = np.dot(v1, v2)
-    norm_prod = np.linalg.norm(v1) * np.linalg.norm(v2)
+        vector1 = vector1.apply(lambda x: 1 if x >= bin_thresh else 0)
+        vector2 = vector2.apply(lambda x: 1 if x >= bin_thresh else 0)
+    dot = np.dot(vector1, vector2)
+    norm_prod = np.linalg.norm(vector1) * np.linalg.norm(vector2)
     cos_sim = dot / norm_prod
     if verbose:
         if binary:
