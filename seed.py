@@ -8,13 +8,15 @@
 # include any weighting or balancing in your metric, as long as you can explain it.
 
 # Solution: we can get a value of association between two tags using the method of cosine similarity.
-# First, we assemble the information into a DataFrame of tag counts per artist. This DataFrame is
-# indexed by artist, with each tag appearing as a column head. As all columns from the DataFrame are
-# indexed identically, we can treat two columns as two vectors in the same vector space and simply
-# find the cosine of the angle between them to get a value of association. For two vectors of
-# postive values, the outcome will be in [0, 1]: 0 for no association, and 1 for perfect association.
-# Note we are not concerned with the magnitude of either vector, but rather with their orientation.
-# In other terms, we are attempting to identify how highly correlated they are.
+# First, we assemble the information into a DataFrame of tag counts per artist. The table is indexed
+# rowise by artist, with a column for each tag.
+
+# As all columns from the DataFrame are indexed identically, we can treat two columns as two vectors
+# in the same vector space and simply find the cosine of the angle between them to get a value of
+# association. For two vectors of postive values, the outcome will be in [0, 1]: 0 for no association,
+# and 1 for perfect association. Note we are not concerned with the magnitude of either vector, but
+# rather with their orientation. In other terms, we are attempting to identify how highly correlated
+# they are.
 
 import json
 
@@ -46,7 +48,6 @@ tag_series = []
 
 # parameters needed to use the 'artist.getTopTags' method
 params = {'method': 'artist.getTopTags', 'api_key': api_key, 'format':'json'}
-
 
 
 for artist in artists:
@@ -94,16 +95,16 @@ for artist in artists:
 # really means 'count' = 1, missing info can thereforebe filled as 0
 tag_frame = DataFrame(tag_series).fillna(0)
 
-# we can use the following function to generate cosine similarities for two tag strings. the
+# We can use the following function to generate cosine similarities for two tag strings. The
 # default DataFrame is the tag_frame generated above, though the user can specify another one.
-# additinoally, i've incldued a 'binary mode' that maps each element of the vectors to a 1 or
+# Additinoally, I've incldued a 'binary mode' that maps each element of the vectors to a 1 or
 # a 0. this can be used if the user is interested in analyzing completely unweighted
-# associations between two tags. given the number of 'junk tags' with low tag count, i've also
+# associations between two tags. Given the number of 'junk tags' with low tag count, I've also
 # included an option for a user to set a threshold for how many counts a tag needs to have
-# before it can be included in the binary option. the verbose mode is used to print the
+# before it can be included in the binary option. The verbose mode is used to print the
 # results to the console.
-def tag_association(t1, t2, binary=False, bin_thresh=1, df=tag_frame, verbose=False):
-    v1, v2 = df[t1], df[t2]
+def tag_association(tag1, tag2, binary=False, bin_thresh=1, df=tag_frame, verbose=False):
+    v1, v2 = df[tag1], df[tag2]
     if binary:
         v1 = v1.apply(lambda x: 1 if x >= bin_thresh else 0)
         v2 = v2.apply(lambda x: 1 if x >= bin_thresh else 0)
@@ -115,7 +116,7 @@ def tag_association(t1, t2, binary=False, bin_thresh=1, df=tag_frame, verbose=Fa
             bm = ' in binary mode'
         else:
             bm = ''
-        print 'Similarity between '+t1+' and '+t2+bm+': '+str(cos_sim)
+        print 'Similarity between ' + tag1 + ' and ' + tag2 + bm + ': ' + str(cos_sim)
     return cos_sim
     
 # some test runs of the tag_association function
